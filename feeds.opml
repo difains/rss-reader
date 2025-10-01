@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <opml version="2.0">
+            <head>
+                <title>OPML Feeds</title>
+            </head>
+            <body>
+                <outline text="https://www.linkedin.com/in/minhee-linzi/" title="https://www.linkedin.com/in/minhee-linzi/" type="rss" xmlUrl="https://www.linkedin.com/in/minhee-linzi/" htmlUrl="https://www.linkedin.com/in/minhee-linzi/" />
+            </body>
+        </opml>
