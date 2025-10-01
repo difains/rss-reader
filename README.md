@@ -1,6 +1,7 @@
 # 📡 Sophrosyne RSS Reader
 
 **Modern, clean RSS reader built by Sophrosyne AI Lab**
+https://difains.github.io/rss-reader/
 
 ## ✨ Features
 
@@ -260,3 +261,4 @@ Sophrosyne AI Lab develops innovative digital solutions focusing on user experie
 **Made with ❤️ by Sophrosyne AI Lab**
 
 *"Clean code, clean feeds, clean mind"*
+https://difains.github.io/rss-reader/
