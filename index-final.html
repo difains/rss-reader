@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophrosyne RSS Reader</title>
+    <meta name="description" content="Modern, clean RSS reader by Sophrosyne AI Lab">
+    
+    <!-- PWA 매니페스트 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- 파비콘 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+    
+    <!-- 스타일시트 -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- RSS Parser 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3/dist/rss-parser.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 헤더 -->
+        <header class="header" id="main-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📡</span>
+                    <h1>Sophrosyne RSS Reader</h1>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="mobile-menu-btn" id="mobile-menu-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <button class="btn-icon" id="settings-toggle" title="설정">
+                        <span>⚙️</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 컨테이너 -->
+        <main class="main-container">
+            <!-- 사이드바 (피드 목록) -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>피드 목록</h2>
+                    <button class="btn-small" id="add-feed-btn">+ 추가</button>
+                </div>
+                
+                <!-- 피드 추가 폼 -->
+                <div class="feed-form" id="feed-form" style="display: none;">
+                    <input type="url" id="feed-url-input" placeholder="RSS URL을 입력하세요" class="input">
+                    <div class="form-buttons">
+                        <button class="btn-primary" id="add-feed-submit">추가</button>
+                        <button class="btn-secondary" id="add-feed-cancel">취소</button>
+                    </div>
+                    
+                    <!-- OPML 업로드 -->
+                    <div class="opml-section">
+                        <label for="opml-upload" class="btn-secondary file-upload-btn">
+                            📁 OPML 파일 업로드
+                        </label>
+                        <input type="file" id="opml-upload" accept=".opml,.xml" style="display: none;">
+                    </div>
+                </div>
+                
+                <!-- 피드 리스트 -->
+                <div class="feed-list" id="feed-list">
+                    <div class="feed-item sample-feed">
+                        <div class="feed-icon">📰</div>
+                        <div class="feed-info">
+                            <div class="feed-name">샘플 피드</div>
+                            <div class="feed-count">0개 항목</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 푸터 -->
+                <div class="sidebar-footer">
+                    <button class="btn-link" id="export-opml">OPML 내보내기</button>
+                    <button class="btn-link" id="clear-cache">캐시 지우기</button>
+                    <div class="copyright">
+                        © 2025 Sophrosyne AI Lab<br>
+                        All rights reserved
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 콘텐츠 영역 -->
+            <div class="content-area">
+                <!-- 기사 목록 -->
+                <section class="article-list" id="article-list">
+                    <div class="article-list-header">
+                        <h2 id="current-feed-title">피드를 선택하세요</h2>
+                        <div class="article-controls">
+                            <button class="btn-small" id="refresh-btn">🔄 새로고침</button>
+                            <button class="btn-small" id="mark-all-read">모두 읽음</button>
+                        </div>
+                    </div>
+                    
+                    <div class="article-items" id="article-items">
+                        <div class="welcome-message">
+                            <h3>Sophrosyne RSS Reader에 오신 것을 환영합니다!</h3>
+                            <p>왼쪽 사이드바에서 RSS 피드를 추가하여 시작하세요.</p>
+                            <ul>
+                                <li>📡 RSS/Atom 피드 지원</li>
+                                <li>📁 OPML 파일 가져오기/내보내기</li>
+                                <li>📱 모바일 최적화</li>
+                                <li>⚡ 오프라인 캐싱</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 기사 내용 -->
+                <section class="article-content" id="article-content">
+                    <div class="article-content-header" id="article-content-header" style="display: none;">
+                        <button class="btn-icon close-article" id="close-article" title="닫기">✕</button>
+                        <div class="article-actions">
+                            <button class="btn-small" id="mark-unread-btn" style="display: none;">안 읽음 표시</button>
+                            <button class="btn-small" id="mark-read-btn">읽음 표시</button>
+                            <button class="btn-small" id="share-btn">공유</button>
+                        </div>
+                    </div>
+                    
+                    <div class="article-content-body" id="article-content-body">
+                        <div class="content-placeholder">
+                            <h3>📖 기사를 선택해주세요</h3>
+                            <p>왼쪽 목록에서 읽고 싶은 기사를 클릭하세요.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- 설정 모달 -->
+        <div class="modal" id="settings-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>설정</h3>
+                    <button class="btn-icon" id="close-settings">✕</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="setting-group">
+                        <label>캐시 TTL (분)</label>
+                        <input type="number" id="cache-ttl" value="60" min="0" class="input">
+                        <small>0은 캐시 사용 안함</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>응답 크기 제한 (KB)</label>
+                        <input type="number" id="response-limit" value="100" min="10" class="input">
+                        <small>큰 피드의 타임아웃 방지</small>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>차단 키워드 (쉼표로 구분)</label>
+                        <input type="text" id="blocklist" placeholder="광고, 스팸" class="input">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="auto-mark-read">
+                            <span>기사 열람 시 자동으로 읽음 표시</span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="hide-read-posts">
+                            <span>읽은 기사 숨기기</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-primary" id="save-settings">저장</button>
+                    <button class="btn-secondary" id="cancel-settings">취소</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 로딩 스피너 -->
+        <div class="loading-overlay" id="loading-overlay" style="display: none;">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>피드를 불러오는 중...</p>
+            </div>
+        </div>
+
+        <!-- 토스트 알림 -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+    
+    <!-- PWA 설치 안내 -->
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
