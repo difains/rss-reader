@@ -120,6 +120,13 @@ class SophrosyneRSSReader {
         
         // 모바일 사이드바 토글
         this.setupMobileMenu();
+        
+        // Enter 키로 피드 추가
+        document.getElementById('feed-url-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.addFeed();
+            }
+        });
     }
     
     setupMobileMenu() {
@@ -201,7 +208,9 @@ class SophrosyneRSSReader {
     updateTheme() {
         document.documentElement.setAttribute('data-theme', this.settings.theme);
         const themeIcon = document.querySelector('.theme-icon');
-        themeIcon.textContent = this.settings.theme === 'light' ? '🌙' : '☀️';
+        if (themeIcon) {
+            themeIcon.textContent = this.settings.theme === 'light' ? '🌙' : '☀️';
+        }
     }
     
     // 피드 관리
@@ -241,6 +250,30 @@ class SophrosyneRSSReader {
             this.hideLoading();
             this.showToast('피드 추가 중 오류가 발생했습니다: ' + error.message, 'error');
         }
+    }
+    
+    deleteFeed(feedId) {
+        if (!confirm('이 피드를 삭제하시겠습니까?')) return;
+        
+        this.feeds = this.feeds.filter(feed => feed.id !== feedId);
+        this.saveFeeds();
+        this.renderFeeds();
+        
+        // 현재 선택된 피드가 삭제된 경우 초기화
+        if (this.currentFeed && this.currentFeed.id === feedId) {
+            this.currentFeed = null;
+            this.currentArticle = null;
+            document.getElementById('current-feed-title').textContent = '피드를 선택하세요';
+            document.getElementById('article-items').innerHTML = `
+                <div class="welcome-message">
+                    <h3>Sophrosyne RSS Reader에 오신 것을 환영합니다!</h3>
+                    <p>왼쪽 사이드바에서 RSS 피드를 추가하여 시작하세요.</p>
+                </div>
+            `;
+            this.closeArticle();
+        }
+        
+        this.showToast('피드가 삭제되었습니다', 'success');
     }
     
     async fetchFeed(url) {
@@ -466,24 +499,38 @@ ${feeds}
                     <div class="feed-name">${this.escapeHtml(feed.title)}</div>
                     <div class="feed-count">${feed.articles.length}개 항목</div>
                 </div>
+                <button class="feed-delete" title="피드 삭제">✕</button>
             `;
             
-            feedElement.addEventListener('click', () => {
-                this.selectFeed(feed);
+            // 피드 선택 이벤트
+            feedElement.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('feed-delete')) {
+                    this.selectFeed(feed, feedElement);
+                }
+            });
+            
+            // 피드 삭제 이벤트
+            const deleteBtn = feedElement.querySelector('.feed-delete');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteFeed(feed.id);
             });
             
             feedList.appendChild(feedElement);
         });
     }
     
-    selectFeed(feed) {
+    selectFeed(feed, element) {
         this.currentFeed = feed;
         
         // 활성 피드 표시
         document.querySelectorAll('.feed-item').forEach(item => {
             item.classList.remove('active');
         });
-        event.currentTarget.classList.add('active');
+        
+        if (element) {
+            element.classList.add('active');
+        }
         
         this.renderArticles();
         
@@ -551,6 +598,12 @@ ${feeds}
         });
     }
     
+    updateArticleList() {
+        if (this.currentFeed) {
+            this.renderArticles();
+        }
+    }
+    
     selectArticle(article, element) {
         this.currentArticle = article;
         
@@ -607,10 +660,19 @@ ${feeds}
     
     closeArticle() {
         document.getElementById('article-content').classList.remove('show');
+        document.getElementById('article-content-header').style.display = 'none';
         document.querySelectorAll('.article-item').forEach(item => {
             item.classList.remove('active');
         });
         this.currentArticle = null;
+        
+        // 기본 플레이스홀더 표시
+        document.getElementById('article-content-body').innerHTML = `
+            <div class="content-placeholder">
+                <h3>📖 기사를 선택해주세요</h3>
+                <p>왼쪽 목록에서 읽고 싶은 기사를 클릭하세요.</p>
+            </div>
+        `;
     }
     
     // 읽음 표시 관리
@@ -703,18 +765,22 @@ ${feeds}
         
         switch (event.key) {
             case 'r':
+            case 'R':
                 this.refreshCurrentFeed();
                 break;
             case 'm':
+            case 'M':
                 this.markCurrentArticleRead();
                 break;
             case 'Escape':
                 this.closeArticle();
                 break;
             case 'j':
+            case 'J':
                 this.selectNextArticle();
                 break;
             case 'k':
+            case 'K':
                 this.selectPreviousArticle();
                 break;
         }
@@ -765,11 +831,11 @@ ${feeds}
         const params = new URLSearchParams(window.location.search);
         const feedUrls = params.get('feeds');
         
-        if (feedUrls) {
+        if (feedUrls && this.feeds.length === 0) {
             const urls = feedUrls.split(',');
-            urls.forEach(url => {
+            urls.forEach(async (url) => {
                 document.getElementById('feed-url-input').value = url.trim();
-                this.addFeed();
+                await this.addFeed();
             });
         }
     }
