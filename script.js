@@ -36,16 +36,10 @@ class SophrosyneRSSReader {
         this.setupEventListeners();
         this.loadFeeds();
         this.loadReadArticles();
-        this.updateTheme();
         this.loadFromURL();
     }
     
     setupEventListeners() {
-        // 테마 토글
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            this.toggleTheme();
-        });
-        
         // 설정 모달
         document.getElementById('settings-toggle').addEventListener('click', () => {
             this.showSettings();
@@ -103,9 +97,13 @@ class SophrosyneRSSReader {
             this.closeArticle();
         });
         
-        // 읽음 표시
+        // 읽음/안읽음 표시
         document.getElementById('mark-read-btn').addEventListener('click', () => {
             this.markCurrentArticleRead();
+        });
+        
+        document.getElementById('mark-unread-btn').addEventListener('click', () => {
+            this.markCurrentArticleUnread();
         });
         
         // 공유
@@ -118,7 +116,7 @@ class SophrosyneRSSReader {
             this.handleKeyboard(e);
         });
         
-        // 모바일 사이드바 토글
+        // 모바일 메뉴
         this.setupMobileMenu();
         
         // Enter 키로 피드 추가
@@ -127,32 +125,36 @@ class SophrosyneRSSReader {
                 this.addFeed();
             }
         });
+        
+        // 모바일에서 헤더 클릭으로 상세 닫기
+        document.getElementById('main-header').addEventListener('click', (e) => {
+            if (window.innerWidth <= 1024 && 
+                document.getElementById('article-content').classList.contains('show')) {
+                this.closeArticle();
+            }
+        });
     }
     
     setupMobileMenu() {
-        const headerControls = document.querySelector('.header-controls');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
         
-        if (window.innerWidth <= 768) {
-            headerControls.addEventListener('click', (e) => {
-                if (e.target === headerControls || e.target.textContent === '☰') {
-                    sidebar.classList.toggle('show');
-                }
-            });
-            
-            // 사이드바 외부 클릭 시 닫기
-            document.addEventListener('click', (e) => {
-                if (!sidebar.contains(e.target) && !headerControls.contains(e.target)) {
-                    sidebar.classList.remove('show');
-                }
-            });
-        }
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('show');
+        });
+        
+        // 사이드바 외부 클릭 시 닫기
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
     }
     
     // 설정 관리
     loadSettings() {
         const defaultSettings = {
-            theme: 'light',
             cacheTTL: 60,
             responseLimit: 100,
             blocklist: '',
@@ -198,21 +200,6 @@ class SophrosyneRSSReader {
         this.showToast('설정이 저장되었습니다', 'success');
     }
     
-    // 테마 관리
-    toggleTheme() {
-        this.settings.theme = this.settings.theme === 'light' ? 'dark' : 'light';
-        this.updateTheme();
-        this.saveSettingsToStorage();
-    }
-    
-    updateTheme() {
-        document.documentElement.setAttribute('data-theme', this.settings.theme);
-        const themeIcon = document.querySelector('.theme-icon');
-        if (themeIcon) {
-            themeIcon.textContent = this.settings.theme === 'light' ? '🌙' : '☀️';
-        }
-    }
-    
     // 피드 관리
     showFeedForm() {
         document.getElementById('feed-form').style.display = 'block';
@@ -237,7 +224,8 @@ class SophrosyneRSSReader {
                 url: url,
                 title: feedData.title || '제목 없음',
                 description: feedData.description || '',
-                articles: feedData.items || []
+                articles: feedData.items || [],
+                addedDate: new Date()
             };
             
             this.feeds.push(feed);
@@ -398,7 +386,8 @@ class SophrosyneRSSReader {
                         url: feed.xmlUrl,
                         title: feedData.title || feed.title,
                         description: feedData.description || '',
-                        articles: feedData.items || []
+                        articles: feedData.items || [],
+                        addedDate: new Date()
                     });
                 } catch (error) {
                     console.warn(`피드 추가 실패: ${feed.title}`, error);
@@ -485,6 +474,19 @@ ${feeds}
                   .replace(/'/g, '&apos;');
     }
     
+    // 날짜 포맷팅
+    formatDate(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        return `${year}${month}${day} ${hours}:${minutes}:${seconds}`;
+    }
+    
     // 피드 및 기사 렌더링
     renderFeeds() {
         const feedList = document.getElementById('feed-list');
@@ -498,6 +500,7 @@ ${feeds}
                 <div class="feed-info">
                     <div class="feed-name">${this.escapeHtml(feed.title)}</div>
                     <div class="feed-count">${feed.articles.length}개 항목</div>
+                    <div class="feed-date">${this.formatDate(feed.addedDate)}</div>
                 </div>
                 <button class="feed-delete" title="피드 삭제">✕</button>
             `;
@@ -569,8 +572,12 @@ ${feeds}
         articles.forEach(article => {
             const articleElement = document.createElement('div');
             articleElement.className = 'article-item';
-            if (this.readArticles.has(article.link)) {
+            
+            const isRead = this.readArticles.has(article.link);
+            if (isRead) {
                 articleElement.classList.add('read');
+            } else {
+                articleElement.classList.add('unread');
             }
             
             const pubDate = article.pubDate ? new Date(article.pubDate).toLocaleDateString('ko-KR', {
@@ -614,16 +621,35 @@ ${feeds}
         element.classList.add('active');
         
         this.renderArticleContent();
+        this.updateReadUnreadButtons();
         
         // 자동 읽음 표시
         if (this.settings.autoMarkRead) {
             this.markArticleRead(article.link);
+            element.classList.remove('unread');
             element.classList.add('read');
         }
         
         // 모바일에서 기사 내용 표시
         if (window.innerWidth <= 1024) {
             document.getElementById('article-content').classList.add('show');
+            document.getElementById('main-header').classList.add('article-open');
+        }
+    }
+    
+    updateReadUnreadButtons() {
+        if (!this.currentArticle) return;
+        
+        const isRead = this.readArticles.has(this.currentArticle.link);
+        const readBtn = document.getElementById('mark-read-btn');
+        const unreadBtn = document.getElementById('mark-unread-btn');
+        
+        if (isRead) {
+            readBtn.style.display = 'none';
+            unreadBtn.style.display = 'inline-block';
+        } else {
+            readBtn.style.display = 'inline-block';
+            unreadBtn.style.display = 'none';
         }
     }
     
@@ -661,6 +687,7 @@ ${feeds}
     closeArticle() {
         document.getElementById('article-content').classList.remove('show');
         document.getElementById('article-content-header').style.display = 'none';
+        document.getElementById('main-header').classList.remove('article-open');
         document.querySelectorAll('.article-item').forEach(item => {
             item.classList.remove('active');
         });
@@ -680,12 +707,41 @@ ${feeds}
         if (!this.currentArticle) return;
         
         this.markArticleRead(this.currentArticle.link);
-        document.querySelector('.article-item.active')?.classList.add('read');
+        this.updateCurrentArticleUI();
+        this.updateReadUnreadButtons();
         this.showToast('읽음으로 표시되었습니다', 'success');
+    }
+    
+    markCurrentArticleUnread() {
+        if (!this.currentArticle) return;
+        
+        this.markArticleUnread(this.currentArticle.link);
+        this.updateCurrentArticleUI();
+        this.updateReadUnreadButtons();
+        this.showToast('안 읽음으로 표시되었습니다', 'success');
+    }
+    
+    updateCurrentArticleUI() {
+        const activeElement = document.querySelector('.article-item.active');
+        if (!activeElement) return;
+        
+        const isRead = this.readArticles.has(this.currentArticle.link);
+        if (isRead) {
+            activeElement.classList.remove('unread');
+            activeElement.classList.add('read');
+        } else {
+            activeElement.classList.remove('read');
+            activeElement.classList.add('unread');
+        }
     }
     
     markArticleRead(link) {
         this.readArticles.add(link);
+        this.saveReadArticles();
+    }
+    
+    markArticleUnread(link) {
+        this.readArticles.delete(link);
         this.saveReadArticles();
     }
     
@@ -772,6 +828,10 @@ ${feeds}
             case 'M':
                 this.markCurrentArticleRead();
                 break;
+            case 'u':
+            case 'U':
+                this.markCurrentArticleUnread();
+                break;
             case 'Escape':
                 this.closeArticle();
                 break;
@@ -818,9 +878,12 @@ ${feeds}
         try {
             const saved = localStorage.getItem('sophrosyne-rss-feeds');
             if (saved) {
-                this.feeds = JSON.parse(saved);
+                this.feeds = JSON.parse(saved).map(feed => ({
+                    ...feed,
+                    addedDate: feed.addedDate ? new Date(feed.addedDate) : new Date()
+                }));
                 this.renderFeeds();
-            }
+            }  
         } catch (error) {
             console.warn('피드 로드 실패:', error);
         }

@@ -22,7 +22,7 @@
 <body>
     <div id="app">
         <!-- 헤더 -->
-        <header class="header">
+        <header class="header" id="main-header">
             <div class="header-content">
                 <div class="logo">
                     <span class="logo-icon">📡</span>
@@ -30,9 +30,11 @@
                 </div>
                 
                 <div class="header-controls">
-                    <button class="btn-icon" id="theme-toggle" title="다크모드 전환">
-                        <span class="theme-icon">🌙</span>
-                    </button>
+                    <div class="mobile-menu-btn" id="mobile-menu-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                     <button class="btn-icon" id="settings-toggle" title="설정">
                         <span>⚙️</span>
                     </button>
@@ -107,7 +109,6 @@
                             <ul>
                                 <li>📡 RSS/Atom 피드 지원</li>
                                 <li>📁 OPML 파일 가져오기/내보내기</li>
-                                <li>🌙 다크모드 지원</li>
                                 <li>📱 모바일 최적화</li>
                                 <li>⚡ 오프라인 캐싱</li>
                             </ul>
@@ -120,6 +121,7 @@
                     <div class="article-content-header" id="article-content-header" style="display: none;">
                         <button class="btn-icon close-article" id="close-article" title="닫기">✕</button>
                         <div class="article-actions">
+                            <button class="btn-small" id="mark-unread-btn" style="display: none;">안 읽음 표시</button>
                             <button class="btn-small" id="mark-read-btn">읽음 표시</button>
                             <button class="btn-small" id="share-btn">공유</button>
                         </div>
