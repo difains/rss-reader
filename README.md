@@ -1,13 +1,12 @@
 # 📡 Sophrosyne RSS Reader
 
 **Modern, clean RSS reader built by Sophrosyne AI Lab**
-https://difains.github.io/rss-reader/
 
 ## ✨ Features
 
 - 🌐 **Cross-platform**: Works on desktop, tablet, and mobile
 - 📱 **PWA Support**: Install as an app on any device
-- 🌙 **Dark Mode**: Automatic theme switching
+- 🌙 **Dark/Light Mode**: Automatic theme switching with manual toggle
 - 📡 **Multiple Protocols**: RSS, Atom, and JSON feeds
 - 📁 **OPML Support**: Import/export feed lists
 - ⚡ **Offline Reading**: Full offline support with smart caching
@@ -17,6 +16,7 @@ https://difains.github.io/rss-reader/
 - 🔄 **Auto Refresh**: Configurable feed refresh intervals
 - 💾 **Local Storage**: All data stored locally, no server required
 - 🚀 **Fast & Lightweight**: Optimized for performance
+- 🎨 **Modern Design**: Based on FormBiz.biz design system
 
 ## 🚀 Quick Start
 
@@ -65,9 +65,9 @@ https://difains.github.io/rss-reader/
 
 ### Adding Feeds
 
-1. **Click "+" button** in the sidebar
+1. **Click "+ 추가" button** in the sidebar
 2. **Enter RSS/Atom URL** (e.g., `https://news.ycombinator.com/rss`)
-3. **Click "추가"** to add the feed
+3. **Press Enter** or **click "추가"** to add the feed
 
 ### Importing OPML
 
@@ -75,15 +75,20 @@ https://difains.github.io/rss-reader/
 2. **Select your OPML file** exported from Feedly, Inoreader, etc.
 3. **Feeds will be automatically imported**
 
-### Keyboard Shortcuts
+### ⌨️ Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| `R` | Refresh current feed |
-| `M` | Mark current article as read |
-| `J` | Next article |
-| `K` | Previous article |
-| `Escape` | Close article view |
+| Key | Action | Location |
+|-----|--------|----------|
+| `T` | Toggle dark/light theme | Theme button |
+| `R` | Refresh current feed | Refresh button |
+| `M` | Mark current article as read | Read button |
+| `U` | Mark current article as unread | Unread button |
+| `J` | Next article | Article navigation |
+| `K` | Previous article | Article navigation |
+| `Enter` | Add feed (when in input) | Feed form |
+| `Escape` | Close article/modal | Close buttons |
+
+*Note: Keyboard shortcuts are displayed next to relevant buttons in the interface*
 
 ### Settings
 
@@ -94,6 +99,14 @@ Access settings by clicking the ⚙️ icon:
 - **Blocklist**: Keywords to filter out (comma-separated)
 - **Auto Mark Read**: Automatically mark articles as read when opened
 - **Hide Read Posts**: Hide articles marked as read
+
+## ⚠️ Important Notice
+
+**Data is stored locally in your browser and is NOT saved to any database.**
+
+**🔴 Important**: Make sure to regularly download your OPML file and re-upload it when needed, as browser data can be cleared!
+
+The info tooltip (ℹ️) next to "피드 목록" will remind you of this.
 
 ## 🔧 Technical Details
 
@@ -123,23 +136,45 @@ The app uses multiple CORS proxies with automatic failover:
 
 ### Performance
 
-- **Lightweight**: ~100KB total size
+- **Lightweight**: ~150KB total size
 - **Fast Loading**: Service Worker pre-caching
 - **Efficient**: Response size limiting prevents timeouts
-- **Optimized**: Minimal dependencies
+- **Optimized**: FormBiz design system with minimal dependencies
 
 ## 📁 File Structure
 
 ```
 sophrosyne-rss-reader/
 ├── index.html          # Main HTML file
-├── style.css           # Stylesheet with dark mode
+├── style.css           # FormBiz design system CSS
 ├── script.js           # Main application logic
 ├── manifest.json       # PWA manifest
 ├── sw.js              # Service Worker
 ├── README.md          # This file
 └── LICENSE            # MIT License
 ```
+
+## 🎨 Design System
+
+This RSS reader uses the **FormBiz.biz design system** with:
+
+### Color Palette
+- **Primary**: Sky Blue (#0ea5e9) - Modern, trustworthy
+- **Secondary**: Slate Gray - Professional, readable
+- **Success**: Emerald Green - Positive actions
+- **Warning**: Amber - Notifications
+- **Error**: Red - Error states
+
+### Typography
+- **Font Family**: Apple system fonts for native feel
+- **Scale**: 12px to 48px systematic sizing
+- **Weights**: 400 (normal) to 700 (bold)
+
+### Components
+- **Cards**: Rounded corners, subtle shadows
+- **Buttons**: Hover effects, consistent spacing
+- **Tooltips**: Informative, accessible
+- **Shortcuts**: Keyboard-friendly design
 
 ## 🛠 Customization
 
@@ -149,7 +184,7 @@ Edit `style.css` to add new color schemes:
 
 ```css
 [data-theme="custom"] {
-    --color-primary: #your-color;
+    --color-primary-500: #your-color;
     --bg-primary: #your-bg;
     /* ... more variables */
 }
@@ -175,6 +210,7 @@ The app is built with a modular class structure. Key methods:
 - `addFeed()`: Add new feed
 - `renderArticles()`: Render article list
 - `selectArticle(article)`: Display article content
+- `toggleTheme()`: Switch between light/dark themes
 
 ## 🔒 Privacy & Security
 
@@ -183,6 +219,7 @@ The app is built with a modular class structure. Key methods:
 - **Local Storage Only**: Feeds and settings stored locally
 - **HTTPS Only**: Secure connections for all requests
 - **Content Sanitization**: HTML content is sanitized for security
+- **No Database**: Data is not persisted on any server
 
 ## 🐛 Troubleshooting
 
@@ -191,7 +228,7 @@ The app is built with a modular class structure. Key methods:
 1. **Check URL**: Ensure it's a valid RSS/Atom feed
 2. **CORS Issues**: Try a different feed to test proxies
 3. **Network**: Check internet connection
-4. **Cache**: Clear cache in settings
+4. **Cache**: Clear cache in settings (button available)
 
 ### App Won't Install
 
@@ -204,6 +241,14 @@ The app is built with a modular class structure. Key methods:
 1. **Reduce Cache TTL**: Lower cache time in settings
 2. **Response Limit**: Reduce response size limit
 3. **Clear Cache**: Use "캐시 지우기" button
+4. **Browser Storage**: Clear browser data if needed
+
+### Data Loss Prevention
+
+1. **Regular OPML Export**: Download your feeds regularly
+2. **Browser Settings**: Don't clear site data
+3. **Bookmark Important Feeds**: Keep backup of URLs
+4. **Multiple Browsers**: Use across different browsers as backup
 
 ## 🤝 Contributing
 
@@ -226,6 +271,13 @@ python -m http.server 8000
 # Open http://localhost:8000
 ```
 
+### Code Style
+
+- **ES6+ JavaScript**: Modern syntax preferred
+- **CSS Variables**: Use design tokens
+- **Semantic HTML**: Accessible markup
+- **Progressive Enhancement**: Works without JavaScript basics
+
 ## 📜 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
@@ -238,6 +290,7 @@ Sophrosyne AI Lab develops innovative digital solutions focusing on user experie
 - **Privacy-focused**
 - **Open source**
 - **User-centric**
+- **Beautifully designed**
 
 ---
 
@@ -252,13 +305,62 @@ Sophrosyne AI Lab develops innovative digital solutions focusing on user experie
 - [ ] **Feed Categories**: Organize feeds into folders
 - [ ] **Search**: Full-text search across articles
 - [ ] **Sync**: Optional cloud sync for multiple devices
-- [ ] **Themes**: More color schemes
+- [ ] **Themes**: More color schemes and customization
 - [ ] **Notifications**: Browser notifications for new articles
 - [ ] **Export**: Export articles to various formats
+- [ ] **Statistics**: Reading analytics and insights
+- [ ] **Mobile App**: Native mobile applications
+
+## 🆕 Recent Updates
+
+### v2.0.0 - Modern Design Update
+- **FormBiz Design System**: Complete UI overhaul
+- **Enhanced Keyboard Shortcuts**: All shortcuts visible in UI
+- **Improved Tooltips**: Better user guidance
+- **Dark Mode**: Fully functional theme switching
+- **Better Accessibility**: Screen reader and keyboard support
+- **Performance**: Faster loading and better caching
+
+### Previous Versions
+- **v1.0.0**: Initial release with basic RSS functionality
+- **v1.1.0**: Added OPML support and offline caching
+- **v1.2.0**: Mobile optimization and PWA features
+
+---
+
+## 💡 Tips & Tricks
+
+### Power User Features
+
+1. **Bulk Operations**: Select multiple articles with Shift+Click
+2. **Quick Navigation**: Use J/K keys like Vim for article browsing
+3. **Feed Management**: Regular OPML exports for backup
+4. **Performance**: Adjust cache settings based on usage
+5. **Keyboard First**: Most actions have keyboard shortcuts
+
+### Sample RSS Feeds to Try
+
+```
+https://news.ycombinator.com/rss
+https://dev.to/feed
+https://feeds.bbci.co.uk/news/rss.xml
+https://rss.cnn.com/rss/edition.rss
+https://feeds.feedburner.com/TechCrunch
+```
 
 ---
 
 **Made with ❤️ by Sophrosyne AI Lab**
 
 *"Clean code, clean feeds, clean mind"*
-https://difains.github.io/rss-reader/
+
+---
+
+## 🔄 Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.0.0 | 2025-10-02 | FormBiz design system, keyboard shortcuts UI, tooltips |
+| 1.2.0 | 2025-09-15 | PWA support, mobile optimization |
+| 1.1.0 | 2025-09-01 | OPML support, caching improvements |
+| 1.0.0 | 2025-08-15 | Initial release |

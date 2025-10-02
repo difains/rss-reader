@@ -8,7 +8,7 @@
     
     <!-- PWA 매니페스트 -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#0ea5e9">
     
     <!-- 파비콘 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -35,6 +35,9 @@
                         <span></span>
                         <span></span>
                     </div>
+                    <button class="btn-icon" id="theme-toggle" title="테마 전환 (T)">
+                        <span class="theme-icon">🌙</span>
+                    </button>
                     <button class="btn-icon" id="settings-toggle" title="설정">
                         <span>⚙️</span>
                     </button>
@@ -47,21 +50,31 @@
             <!-- 사이드바 (피드 목록) -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <h2>피드 목록</h2>
-                    <button class="btn-small" id="add-feed-btn">+ 추가</button>
+                    <div class="sidebar-title-group">
+                        <h2>피드 목록</h2>
+                        <div class="tooltip-container">
+                            <span class="info-icon">ℹ️</span>
+                            <div class="tooltip">
+                                DB에 저장되지 않습니다.<br>
+                                꼭 OPML 파일을 내려받고,<br>
+                                다시 올려서 사용하세요!
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary btn-small" id="add-feed-btn">+ 추가</button>
                 </div>
                 
                 <!-- 피드 추가 폼 -->
-                <div class="feed-form" id="feed-form" style="display: none;">
-                    <input type="url" id="feed-url-input" placeholder="RSS URL을 입력하세요" class="input">
+                <div class="feed-form card" id="feed-form" style="display: none;">
+                    <input type="url" id="feed-url-input" placeholder="RSS URL을 입력하세요 (Enter로 추가)" class="input">
                     <div class="form-buttons">
-                        <button class="btn-primary" id="add-feed-submit">추가</button>
-                        <button class="btn-secondary" id="add-feed-cancel">취소</button>
+                        <button class="btn-primary btn-small" id="add-feed-submit">추가 <span class="shortcut">(Enter)</span></button>
+                        <button class="btn-secondary btn-small" id="add-feed-cancel">취소 <span class="shortcut">(Esc)</span></button>
                     </div>
                     
                     <!-- OPML 업로드 -->
                     <div class="opml-section">
-                        <label for="opml-upload" class="btn-secondary file-upload-btn">
+                        <label for="opml-upload" class="btn-secondary btn-small file-upload-btn">
                             📁 OPML 파일 업로드
                         </label>
                         <input type="file" id="opml-upload" accept=".opml,.xml" style="display: none;">
@@ -70,12 +83,8 @@
                 
                 <!-- 피드 리스트 -->
                 <div class="feed-list" id="feed-list">
-                    <div class="feed-item sample-feed">
-                        <div class="feed-icon">📰</div>
-                        <div class="feed-info">
-                            <div class="feed-name">샘플 피드</div>
-                            <div class="feed-count">0개 항목</div>
-                        </div>
+                    <div class="welcome-message">
+                        <p>피드를 추가하여 시작하세요</p>
                     </div>
                 </div>
                 
@@ -97,8 +106,10 @@
                     <div class="article-list-header">
                         <h2 id="current-feed-title">피드를 선택하세요</h2>
                         <div class="article-controls">
-                            <button class="btn-small" id="refresh-btn">🔄 새로고침</button>
-                            <button class="btn-small" id="mark-all-read">모두 읽음</button>
+                            <button class="btn-secondary btn-small" id="refresh-btn">
+                                🔄 새로고침 <span class="shortcut">(R)</span>
+                            </button>
+                            <button class="btn-secondary btn-small" id="mark-all-read">모두 읽음</button>
                         </div>
                     </div>
                     
@@ -106,12 +117,14 @@
                         <div class="welcome-message">
                             <h3>Sophrosyne RSS Reader에 오신 것을 환영합니다!</h3>
                             <p>왼쪽 사이드바에서 RSS 피드를 추가하여 시작하세요.</p>
-                            <ul>
-                                <li>📡 RSS/Atom 피드 지원</li>
-                                <li>📁 OPML 파일 가져오기/내보내기</li>
-                                <li>📱 모바일 최적화</li>
-                                <li>⚡ 오프라인 캐싱</li>
-                            </ul>
+                            <div class="features-list">
+                                <div class="feature-item">📡 RSS/Atom 피드 지원</div>
+                                <div class="feature-item">📁 OPML 파일 가져오기/내보내기</div>
+                                <div class="feature-item">🌙 다크/라이트 모드 <span class="shortcut-inline">(T)</span></div>
+                                <div class="feature-item">⌨️ 키보드 단축키 지원 <span class="shortcut-inline">(J/K 이동)</span></div>
+                                <div class="feature-item">📱 모바일 최적화</div>
+                                <div class="feature-item">⚡ 오프라인 캐싱</div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -119,18 +132,22 @@
                 <!-- 기사 내용 -->
                 <section class="article-content" id="article-content">
                     <div class="article-content-header" id="article-content-header" style="display: none;">
-                        <button class="btn-icon close-article" id="close-article" title="닫기">✕</button>
+                        <button class="btn-icon close-article" id="close-article" title="닫기 (Esc)">✕</button>
                         <div class="article-actions">
-                            <button class="btn-small" id="mark-unread-btn" style="display: none;">안 읽음 표시</button>
-                            <button class="btn-small" id="mark-read-btn">읽음 표시</button>
-                            <button class="btn-small" id="share-btn">공유</button>
+                            <button class="btn-secondary btn-small" id="mark-unread-btn" style="display: none;">
+                                안 읽음 표시 <span class="shortcut">(U)</span>
+                            </button>
+                            <button class="btn-primary btn-small" id="mark-read-btn">
+                                읽음 표시 <span class="shortcut">(M)</span>
+                            </button>
+                            <button class="btn-secondary btn-small" id="share-btn">공유</button>
                         </div>
                     </div>
                     
                     <div class="article-content-body" id="article-content-body">
                         <div class="content-placeholder">
                             <h3>📖 기사를 선택해주세요</h3>
-                            <p>왼쪽 목록에서 읽고 싶은 기사를 클릭하세요.</p>
+                            <p>왼쪽 목록에서 읽고 싶은 기사를 클릭하거나 <span class="shortcut-inline">J/K</span> 키로 이동하세요.</p>
                         </div>
                     </div>
                 </section>
@@ -139,10 +156,10 @@
 
         <!-- 설정 모달 -->
         <div class="modal" id="settings-modal" style="display: none;">
-            <div class="modal-content">
+            <div class="modal-content card">
                 <div class="modal-header">
                     <h3>설정</h3>
-                    <button class="btn-icon" id="close-settings">✕</button>
+                    <button class="btn-icon" id="close-settings" title="닫기 (Esc)">✕</button>
                 </div>
                 
                 <div class="modal-body">
@@ -176,18 +193,48 @@
                             <span>읽은 기사 숨기기</span>
                         </label>
                     </div>
+                    
+                    <div class="keyboard-shortcuts">
+                        <h4>키보드 단축키</h4>
+                        <div class="shortcuts-grid">
+                            <div class="shortcut-item">
+                                <kbd>T</kbd> 테마 전환
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>R</kbd> 새로고침
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>M</kbd> 읽음 표시
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>U</kbd> 안 읽음 표시
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>J</kbd> 다음 기사
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>K</kbd> 이전 기사
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>Esc</kbd> 닫기
+                            </div>
+                            <div class="shortcut-item">
+                                <kbd>Enter</kbd> 피드 추가
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="modal-footer">
                     <button class="btn-primary" id="save-settings">저장</button>
-                    <button class="btn-secondary" id="cancel-settings">취소</button>
+                    <button class="btn-secondary" id="cancel-settings">취소 <span class="shortcut">(Esc)</span></button>
                 </div>
             </div>
         </div>
 
         <!-- 로딩 스피너 -->
         <div class="loading-overlay" id="loading-overlay" style="display: none;">
-            <div class="loading-spinner">
+            <div class="loading-spinner card">
                 <div class="spinner"></div>
                 <p>피드를 불러오는 중...</p>
             </div>
